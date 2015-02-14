@@ -6,7 +6,8 @@
 %{
 #include "heading.h"
 int yyerror(char *s);
-int yylex(void);
+int yylex(void);c
+extern char *yytext;	
 %}
 
 /*bison declarations*/
@@ -55,7 +56,6 @@ NUMBER: {printf("NUMBER -> (%d)" ,yytext)};
 
 int yyerror(int l, int c, int err)
 {
-  extern char *yytext;	// defined and maintained in lex.c
   if(err == 1) printf("Error at line %d, column %d: identifier \"%s\" must begin with letter. Exiting program.\n", line, column, yytext); exit(0);
   else if (err == 2) printf("Error at line %d, column %d: identifier \"%s\" must not end with underscore. Exiting program.\n", line, column, yytext); exit(0);
   else if (err == 3) printf("Error at line %d, column %d: unrecognized symbol \"%s\". Exiting program.\n", line, column, yytext); exit(0);
