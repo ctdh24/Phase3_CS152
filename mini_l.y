@@ -35,10 +35,20 @@ exp:		INTEGER_LITERAL	{ $$ = $1; }
 		| exp MULT exp	{ $$ = $1 * $3; }
 		;
     
-Term: MINUS Term {printf ("-}
-    | Var {printf }
-    | 
+Term: Term1 Term2 
+      | Term2
+      ;
+      
+Term1: SUB;
 
+SUB: {printf("Term1 -> SUB\n")};
+
+Term2: Var 
+       | NUMBER {} 
+       | L_PAREN Expression R_PAREN {}
+       ;
+       
+NUMBER: {printf("NUMBER -> (%d)" ,yytext)};
 %%
 
 /*additional c code*/
