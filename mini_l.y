@@ -34,19 +34,23 @@ exp:		INTEGER_LITERAL	{ $$ = $1; }
 		| exp PLUS exp	{ $$ = $1 + $3; }
 		| exp MULT exp	{ $$ = $1 * $3; }
 		;
+    
+Term: MINUS Term {printf ("-}
+    | Var {printf }
+    | 
 
 %%
 
 /*additional c code*/
 
-int yyerror(string s)
+int yyerror(int l, int c, int err)
 {
-  extern int yylineno;	// defined and maintained in lex.c
   extern char *yytext;	// defined and maintained in lex.c
+  if(err == 1) printf("Error at line %d, column %d: identifier \"%s\" must begin with letter. Exiting program.\n", line, column, yytext); exit(0);
+  else if (err == 2) printf("Error at line %d, column %d: identifier \"%s\" must not end with underscore. Exiting program.\n", line, column, yytext); exit(0);
+  else if (err == 3) printf("Error at line %d, column %d: unrecognized symbol \"%s\". Exiting program.\n", line, column, yytext); exit(0);
   
-  cerr << "ERROR: " << s << " at symbol \"" << yytext;
-  cerr << "\" on line " << yylineno << endl;
-  exit(1);
+  
 }
 
 int yyerror(char *s)
