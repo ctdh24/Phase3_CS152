@@ -3,7 +3,10 @@
  * Jonathan Pang
  * Calvin Huynh
  */
-
+%{
+#include "y.tab.h"
+#include "heading.h"
+%}
 /* Keep track of current line and column for error messages */
 	int line = 1, column = 1;
 
@@ -77,7 +80,7 @@ COMMENT ("##")(.)*
 
 /* Actions that occur when reading in token */
 %%
-{PROGRAM} column+=yyleng; return PROGRAM;
+{PROGRAM} {column+=yyleng; return PROGRAM;}
 {BEGIN_PROGRAM} column+=yyleng; return BEGIN_PROGRAM; 
 {END_PROGRAM} column+=yyleng; return END_PROGRAM; 
 {INTEGER} column+=yyleng; return INTEGER;
