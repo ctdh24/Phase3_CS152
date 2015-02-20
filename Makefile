@@ -21,7 +21,7 @@ bison.o:	bison.c
 bison.c:	mini_l.y
 		bison -d -v mini_l.y
 		cp mini_l.tab.c bison.c
-		cmp -s mini_l.tab.h tok.h || cp mini_l.tab.h tok.h
+		cmp -s mini_l.tab.h y.tab.h tok.h || cp mini_l.tab.h y.tab.h tok.h
 
 main.o:		main.cc
 		$(CC) $(CFLAGS) -c main.cc -o main.o
