@@ -6,9 +6,11 @@
 %{
 #include "y.tab.h"
 #include "heading.h"
+int yyerror(char* s);
+int yylex(void);
 %}
 /* Keep track of current line and column for error messages */
-	int line = 1, column = 1;
+	int line = 1, column = 1, err = -1;
 
 /* Task 1: Read text from standard-in and prints identified tokens, 1 token per line */
 
@@ -47,7 +49,7 @@ DIV ("/")
 MOD ("%")
 
 /* Comparison Operators*/
-EQ ("=")
+EQ ("==")
 NEQ ("!=")
 LT ("<")
 GT (">")
@@ -80,60 +82,60 @@ COMMENT ("##")(.)*
 
 /* Actions that occur when reading in token */
 %%
-{PROGRAM} {column+=yyleng; return PROGRAM;}
-{BEGIN_PROGRAM} column+=yyleng; return BEGIN_PROGRAM; 
-{END_PROGRAM} column+=yyleng; return END_PROGRAM; 
-{INTEGER} column+=yyleng; return INTEGER;
-{ARRAY} column+=yyleng; return ARRAY;
-{OF} column+=yyleng; return OF;
-{IF} column+=yyleng; return IF;
-{THEN} column+=yyleng; return THEN;
-{ENDIF} column+=yyleng; return ENDIF;
-{ELSE} column+=yyleng; return ELSE;
-{ELSEIF} column+=yyleng; return ELSEIF;
-{WHILE} column+=yyleng; return WHILE;
-{DO} column+=yyleng; return DO;
-{BEGINLOOP} column+=yyleng; return BEGINLOOP;
-{ENDLOOP} column+=yyleng; return ENDLOOP;
-{BREAK} column+=yyleng; return BREAK;
-{CONTINUE} column+=yyleng; return CONTINUE;
-{EXIT} column+=yyleng; return EXIT;
-{READ} column+=yyleng; return READ;
-{WRITE} column+=yyleng; return WRITE;
-{AND} column+=yyleng; return AND; 
-{OR} column+=yyleng; return OR;
-{NOT} column+=yyleng; return NOT;
-{TRUE} column+=yyleng; return TRUE;
-{FALSE} column+=yyleng; return FALSE;
-{SUB} column+=yyleng; return SUB;
-{ADD} column+=yyleng; return ADD;
-{MULT} column+=yyleng; return MULT;
-{DIV} column+=yyleng; return DIV;
-{MOD} column+=yyleng; return MOD;
-{EQ} column+=yyleng; return EQ;
-{NEQ} column+=yyleng; return NEQ;
-{LT} column+=yyleng; return LT;
-{GT} column+=yyleng; return GT;
-{LTE} column+=yyleng; return LTE;
-{GTE} column+=yyleng; return GTE;
-{NUMBER} column+=yyleng; return NUMBER;
-{SEMICOLON} column+=yyleng; return SEMICOLON;
-{COLON} column+=yyleng; return COLON;
-{COMMA} column+=yyleng; return COMMA;
-{QUESTION} column+=yyleng; return QUESTION;
-{L_BRACKET} column+=yyleng; return L_BRACKET;
-{R_BRACKET} column+=yyleng; return R_BRACKET;
-{L_PAREN} column+=yyleng; return L_PAREN;
-{R_PAREN} column+=yyleng; return R_PAREN;
-{ASSIGN} column+=yyleng; return ASSIGN; 
-{IDENT} column+=yyleng; return IDENT;
+{PROGRAM} column+=yyleng; {printf("program -> PROGRAM\n");}
+{BEGIN_PROGRAM} column+=yyleng; {printf("begin_program -> BEGIN_PROGRAM\n");}
+{END_PROGRAM} column+=yyleng; {printf("end_program -> END_PROGRAM\n");}
+{INTEGER} column+=yyleng; {printf("integer -> INTEGER \n");}
+{ARRAY} column+=yyleng; {printf("array -> ARRAY\n");}
+{OF} column+=yyleng; {printf("of -> OF\n");}
+{IF} column+=yyleng; {printf("if -> IF\n");}
+{THEN} column+=yyleng; {printf("then-> THEN\n");}
+{ENDIF} column+=yyleng; {printf("endif -> ENDIF\n");}
+{ELSE} column+=yyleng; {printf("else -> ELSE\n");}
+{ELSEIF} column+=yyleng; {printf("elseif -> ELSEIF\n");}
+{WHILE} column+=yyleng; {printf("while -> WHILE\n");}
+{DO} column+=yyleng; {printf("do -> DO\n");}
+{BEGINLOOP} column+=yyleng; {printf("beginloop -> BEGINLOOP\n");}
+{ENDLOOP} column+=yyleng; {printf("endloop -> ENDLOOP\n");}
+{BREAK} column+=yyleng; {printf("break -> BREAK\n");}
+{CONTINUE} column+=yyleng; {printf("continue -> CONTINUE\n");}
+{EXIT} column+=yyleng;{printf("exit -> EXIT\n");}
+{READ} column+=yyleng; {printf("read -> READ\n");}
+{WRITE} column+=yyleng; {printf("write -> WRITE\n");}
+{AND} column+=yyleng; {printf("and -> AND\n");}
+{OR} column+=yyleng; {printf("or -> OR\n");}
+{NOT} column+=yyleng; {printf("not -> NOT\n");}
+{TRUE} column+=yyleng; {printf("true -> TRUE\n");}
+{FALSE} column+=yyleng; {printf("false -> FALSE\n");}
+{SUB} column+=yyleng; 
+{ADD} column+=yyleng; 
+{MULT} column+=yyleng; 
+{DIV} column+=yyleng; 
+{MOD} column+=yyleng; 
+{EQ} column+=yyleng; {printf("comp -> EQ\n");}
+{NEQ} column+=yyleng; {printf("comp -> NEQ\n");}
+{LT} column+=yyleng; {printf("comp -> LT\n");}
+{GT} column+=yyleng; {printf("comp -> GT\n");}
+{LTE} column+=yyleng; {printf("comp -> LTE\n");}
+{GTE} column+=yyleng; {printf("comp -> GTE\n");}
+{NUMBER} column+=yyleng; {printf("number -> NUMBER (%s)\n" ,yytext);}
+{SEMICOLON} column+=yyleng; {printf("semicolon -> SEMICOLON\n");}
+{COLON} column+=yyleng;{printf("colon -> COLON\n");}
+{COMMA} column+=yyleng; {printf("comma -> COMMA\n");}
+{QUESTION} column+=yyleng; {printf("question -> QUESTION\n");}
+{L_BRACKET} column+=yyleng; {printf("l_bracket -> L_BRACKET\n");}
+{R_BRACKET} column+=yyleng; {printf("r_bracket -> R_BRACKET\n"); }
+{L_PAREN} column+=yyleng; {printf("l_paren -> L_PAREN\n"); }
+{R_PAREN} column+=yyleng; {printf("r_paren -> R_PAREN\n"); }
+{ASSIGN} column+=yyleng; {printf("assign -> ASSIGN\n");}
+{IDENT} column+=yyleng; {printf("ident -> IDENT (%s)\n" , yytext);}
 {COMMENT} column+=yyleng;
 [ \t\r] column++; /*ignore whitespace. the space at the front is necessary for single space */
 [\n] ++line; column = 1;
 
-{FAKE_IDENT1} yyerror(line, column, 1); exit(0);
-{FAKE_IDENT2} yyerror(line, column, 2); exit(0);
-. yyerror(line, column, 3); exit(0);
+{FAKE_IDENT1} {err = 1; yyerror(""); exit(0);}
+{FAKE_IDENT2} {err = 2; yyerror(""); exit(0);}
+. err = 3; yyerror(""); exit(0);
 %%
 /*
 int main( int argc, char **argv )
