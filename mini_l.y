@@ -7,6 +7,10 @@
 #include "heading.h"
 int yyerror(char* s);
 int yylex(void);
+extern int produc;
+extern int line;
+extern int column;
+extern int err;
 extern char *yytext;
 %}
 
@@ -30,8 +34,9 @@ extern char *yytext;
 
 /*grammar rules*/
 input: /* empty */
-	| Term { }
-  | Bool_Exp
+	| Program { }
+	| Term
+  	| Bool_Exp
 	;
 /*
 exp: INTEGER_LITERAL { $$ = $1; }
@@ -40,49 +45,72 @@ exp: INTEGER_LITERAL { $$ = $1; }
 	;*/
 
 /*NON-TERMINALS*/
-Program: PROGRAM IDENT SEMICOLON Block ENDPROGRAM
+
+Program: PROGRAM IDENT SEMICOLON Block END_PROGRAM {produc +=1; printf("%d: prog_start -> program ident semicolon block end_program\n", produc);}
   ; 
   
-Block: Block1 BEGINPROGRAM Block2 {printf("block -> block1 beginprogram block2\n");}
+Block: Declaration SEMICOLON Block1 BEGIN_PROGRAM Statement SEMICOLON Statement3 {produc +=1; printf("%d: block -> declaration semicolon block1 beginprogram statement semicolon statement3\n", produc);}
   ;
 
-Block1: /*EMPTY*/ {printf("block1 -> \n");}
-  | Declaration SEMICOLON Block1 {printf("block1 -> declaration semicolon block1\n");}
+Block1: /*EMPTY*/ {produc +=1; printf("%d: block1 -> \n", produc);}
+  | Declaration SEMICOLON Block1 {produc +=1; printf("%d: block1 -> declaration semicolon block1\n", produc);}
+  ;
+  
+Declaration: IDENT Declaration1 COLON Declaration2 {produc +=1; printf("%d: declaration -> ident declaration1 colon declaration2\n", produc);}
   ;
 
-Block2: /*EMPTY*/ {printf("block2 -> \n");}
-  | Statement SEMICOLON Block2 {printf("block2 -> statement semicolon block2\n");}
+Declaration1: /*EMPTY*/ {produc +=1; printf("%d: declaration1 -> \n", produc);}
+  | COMMA IDENT Declaration1 {produc +=1; printf("%d: declaration1 -> comma ident declaration1\n", produc);}
   ;
   
-Declaration: IDENT Declaration1 COLON Declaration 2 {printf("declaration -> ident declaration1 colon declaration2\n");}
+Declaration2: INTEGER {produc +=1; printf("%d: declaration2 -> integer\n", produc);}
+  | ARRAY L_BRACKET NUMBER R_BRACKET OF INTEGER{produc +=1; printf("%d: declaration2 -> array l_bracket number r_bracket of integer\n", produc);}
   ;
 
-Declaration1: /*EMPTY*/ {printf("declaration1 -> \n");}
-  | COMMA IDENT Declaration1 {printf("declaration1 -> comma ident declaration1\n");}
+Statement: Var ASSIGN Exp  {produc += 1; printf("%d: statement -> var assign expression\n", produc);}
+  |Var ASSIGN Bool_Exp QUESTION Exp COLON Exp {produc += 1; printf("%d: statement -> var assign bool_exp question expression colon expression\n", produc);}
+  |IF Bool_Exp THEN Statement SEMICOLON Statement3 Statement4 ENDIF {produc += 1; printf("%d: statement -> if bool_exp then statement semicolon statement3 statement4 endif\n", produc);}
+  |WHILE Bool_Exp BEGINLOOP Statement SEMICOLON Statement3 ENDLOOP {produc += 1; printf("%d: statement -> while bool_exp beginloop statement semicolon statement3 endloop\n", produc);}
+  |DO BEGINLOOP Statement SEMICOLON Statement3 ENDLOOP WHILE Bool_Exp {produc += 1; printf("%d: statement -> do beginloop statement semicolon statement3 endloop while bool_exp\n", produc);}
+  |READ Var Statement2 {produc +=1; printf("%d: statement -> read var statement2\n", produc);}
+  |WRITE Var Statement2 {produc +=1; printf("%d: statement -> write var statement2\n", produc);}
+  |BREAK
+  |CONTINUE
+  |EXIT
+  ;
+
+Statement2: /*EMPTY*/ {produc +=1; printf("%d: statement2 -> \n", produc);}
+  | COMMA Var Statement2 {produc +=1; printf("%d: statement2 -> comma var statement2\n", produc);}
+  ;
+
+Statement3: /*EMPTY*/ {produc +=1; printf("%d: statement3 -> \n", produc);}
+  | Statement SEMICOLON Statement3 {produc +=1; printf("%d: statement3 -> statement semicolon statement3\n", produc);}
+  ;
+
+Statement4: /*EMPTY*/ {produc +=1; printf("%d: statement4 -> \n", produc);}
+  | ELSEIF Bool_Exp Statement SEMICOLON Statement3 Statement4 {produc += 1; printf("%d: statement4 -> elseif bool_exp statement semicolon statement3 statement4");}
+  | ELSE Statement SEMICOLON Statement3 {produc += 1; printf("%d: statement4 -> else statement semicolon statement3\n", produc);}
+  ;
+
+Bool_Exp: Bool_Exp OR Bool_Exp {produc +=1; printf("%d: bool_exp -> bool_exp or bool_exp\n", produc);}
+  | Rel_And_Exp {produc +=1; printf("%d: bool_exp -> relation_and_exp\n", produc);}
   ;
   
-Declaration2: INTEGER {printf("declaration2 -> integer\n");}
-  | ARRAY L_BRACKET NUMBER R_BRACKET OF INTEGER{printf("declaration2 -> array l_bracket number r_bracket of integer\n");}
-  ;
-Bool_Exp: Bool_Exp OR Bool_Exp {printf("bool_exp -> bool_exp or bool_exp\n");}
-  | Rel_And_Exp {printf("bool_exp -> relation_and_exp\n");}
+Rel_And_Exp: Rel_And_Exp AND Rel_And_Exp {produc +=1; printf("%d: relation_and_exp -> relation_and_exp and relation_and_exp\n", produc);}
+  |Rel_Exp {produc +=1; printf("%d: relation_and_exp -> relation_exp\n", produc);}
   ;
   
-Rel_And_Exp: Rel_And_Exp AND Rel_And_Exp {printf("relation_and_exp -> relation_and_exp and relation_and_exp\n");}
-  |Rel_Exp {printf("relation_and_exp -> relation_exp\n");}
-  ;
-  
-Rel_Exp: Rel_Exp1 Rel_Exp2 {printf("relation_exp -> relation_exp1 relation_exp2\n");}
-	| Rel_Exp2 {printf("relation_exp -> relation_exp2\n");}
+Rel_Exp: Rel_Exp1 Rel_Exp2 {produc +=1; printf("%d: relation_exp -> relation_exp1 relation_exp2\n", produc);}
+	| Rel_Exp2 {produc +=1; printf("%d: relation_exp -> relation_exp2\n", produc);}
 	;
 
-Rel_Exp1: NOT {printf("relation_exp1 -> not\n");}
+Rel_Exp1: NOT {produc +=1; printf("%d: relation_exp1 -> not\n", produc);}
   ;
 
-Rel_Exp2: Exp Comp Exp {printf("relation_exp2 -> expression comp expression\n");}
-  | TRUE {printf("relation_exp2 -> true\n");}
-  | FALSE {printf("relation_exp2 -> false\n");}
-  | L_PAREN Bool_Exp R_PAREN {printf("relation_exp2 -> l_paren expression r_paren\n");}
+Rel_Exp2: Exp Comp Exp {produc +=1; printf("%d: relation_exp2 -> expression comp expression\n", produc);}
+  | TRUE {produc +=1; printf("%d: relation_exp2 -> true\n", produc);}
+  | FALSE {produc +=1; printf("%d: relation_exp2 -> false\n", produc);}
+  | L_PAREN Bool_Exp R_PAREN {produc +=1; printf("%d: relation_exp2 -> l_paren expression r_paren\n", produc);}
   ;
 Comp: EQ 
   | NEQ 
@@ -91,31 +119,31 @@ Comp: EQ
   | LTE 
   | GTE  
   ;
-Term: Term1 Term2 {printf("term -> term1 term2\n");}
-	| Term2 {printf("term -> term2\n");}
+Term: Term1 Term2 {produc +=1; printf("%d: term -> term1 term2\n", produc);}
+	| Term2 {produc +=1; printf("%d: term -> term2\n", produc);}
 	;
 
-Term1: SUB {printf("term1 -> sub\n");}
+Term1: SUB {produc +=1; printf("%d: term1 -> sub\n", produc);}
 	;
 
-Term2: Var {printf("term2 -> var\n");}
-	| NUMBER {printf("term2 -> number\n");}
-	| L_PAREN Exp R_PAREN {printf("l_paren expression r_paren\n");}
+Term2: NUMBER {produc +=1; printf("%d: term2 -> number\n", produc);}
+	| Var {produc +=1; printf("%d: term2 -> var\n", produc);}
+	| L_PAREN Exp R_PAREN {produc +=1; printf("%d: l_paren expression r_paren\n", produc);}
 	;
 /*{printf("\n");}*/
-Var: IDENT {printf("var -> ident\n");}
-	| IDENT L_BRACKET Exp R_BRACKET {printf("var -> ident l_bracket expression r_bracket\n");}
+Var: IDENT {produc +=1; printf("%d: var -> ident\n", produc);}
+	| IDENT L_BRACKET Exp R_BRACKET {produc +=1; printf("%d: var -> ident l_bracket expression r_bracket\n", produc);}
 	;
 
-Exp: Mul_Exp {printf("expression -> expression\n");}
-	| Exp ADD Exp {printf("expression -> expression add expression\n");}
-	| Exp SUB Exp {printf("expression -> expression sub expression\n");}
+Exp: Mul_Exp {produc +=1; printf("%d: expression -> expression\n", produc);}
+	| Exp ADD Exp {produc +=1; printf("%d: expression -> expression add expression\n", produc);}
+	| Exp SUB Exp {produc +=1; printf("%d: expression -> expression sub expression\n", produc);}
 	;
 
-Mul_Exp: Mul_Exp MULT Mul_Exp {printf("expression -> expression mult expression\n");}
-	| Mul_Exp DIV Mul_Exp {printf("expression -> expression div expression\n");}
-	| Mul_Exp MOD Mul_Exp {printf("expression -> expression mod expression\n");}
-	| Term {printf("expression -> term\n");}
+Mul_Exp: Mul_Exp MULT Mul_Exp {produc +=1; printf("%d: expression -> expression mult expression\n", produc);}
+	| Mul_Exp DIV Mul_Exp {produc +=1; printf("%d: expression -> expression div expression\n", produc);}
+	| Mul_Exp MOD Mul_Exp {produc +=1; printf("%d: expression -> expression mod expression\n", produc);}
+	| Term {produc +=1; printf("%d: expression -> term\n", produc);}
 	;
 
 /*TERMINALS*/
@@ -124,20 +152,23 @@ Mul_Exp: Mul_Exp MULT Mul_Exp {printf("expression -> expression mult expression\
 /*additional c code*/
 int yyerror(string s)
 {
-	extern int line;
-  extern int column;
-  extern int err;
+  const char *tmp;
+  tmp = s.c_str();
   /* extern char *yytext;*/
-	if(err == 1){ 
-		printf("Error at line %d, column %d: identifier \"%s\" must begin with letter. Exiting program.\n", line, column, yytext); exit(0);
-	}
+  if(err == 1){ 
+    printf("Error at line %d, column %d: identifier \"%s\" must begin with letter. Exiting program.\n", line, column, yytext); exit(0);
+  }
   else if (err == 2){
     printf("Error at line %d, column %d: identifier \"%s\" must not end with underscore. Exiting program.\n", line, column, yytext); exit(0);
   }
-  else if (err == 3) printf("Error at line %d, column %d: unrecognized symbol \"%s\". Exiting program.\n", line, column, yytext); exit(0);
+  else if (err == 3) { 
+    printf("Error at line %d, column %d: unrecognized symbol \"%s\". Exiting program.\n", line, column, yytext); exit(0);
+  }
+  else{printf("Line%d: Parse error: %s\n", line, tmp); exit(0);}
 }
 
 int yyerror(char *s)
 {
+  printf("Line%d: Parse error: %s\n", line,s); exit(0);
   return yyerror(string(s));
 }
