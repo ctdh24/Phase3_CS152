@@ -5,9 +5,14 @@
  */
 %{
 #include "y.tab.h"
-#include "heading.h"
+#include <string.h>
+#include <sstream>
+using namespace std;
+
 int yyerror(char* s);
 int yylex(void);
+string output_vars;
+string output_code;
 %}
 /* Keep track of current line and column for error messages */
 	int line = 1, column = 1, err = -1, produc = 0;
@@ -83,8 +88,8 @@ COMMENT ("##")(.)*
 /* Actions that occur when reading in token */
 %%
 {PROGRAM} column+=yyleng; produc +=1; {printf("%d: program -> PROGRAM\n", produc); return PROGRAM;}
-{BEGIN_PROGRAM} column+=yyleng; produc +=1; {printf("%d: begin_program -> BEGIN_PROGRAM\n", produc); return BEGIN_PROGRAM;}
-{END_PROGRAM} column+=yyleng; produc +=1; {printf("%d: end_program -> END_PROGRAM\n", produc); return END_PROGRAM;}
+{BEGIN_PROGRAM} column+=yyleng; produc +=1; {freopen("code.txt", "a", stdout); printf(":= START\n"); fclose(stdout); return BEGIN_PROGRAM;}
+{END_PROGRAM} column+=yyleng; produc +=1; {freopen("code.txt", "a", stdout); printf(":= EndLabel\n"); fclose(stdout); return END_PROGRAM;}
 {INTEGER} column+=yyleng; produc +=1; {printf("%d: integer -> INTEGER \n", produc); return INTEGER;}
 {ARRAY} column+=yyleng; produc +=1; {printf("%d: array -> ARRAY\n", produc); return ARRAY;}
 {OF} column+=yyleng; produc +=1; {printf("%d: of -> OF\n", produc); return OF;}
@@ -135,9 +140,11 @@ COMMENT ("##")(.)*
 [ \t\r] column++; /*ignore whitespace. the space at the front is necessary for single space */
 [\n] ++line; column = 1;
 
-{FAKE_IDENT1} {err = 1; yyerror(""); exit(0);}
-{FAKE_IDENT2} {err = 2; yyerror(""); exit(0);}
-. err = 3; yyerror(""); exit(0);
+
+{FAKE_IDENT1} //{err = 1; printf("Error at line %d, column %d: identifier \"%s\" must begin with letter. \n", line, column, yytext); }
+{FAKE_IDENT2} //{err = 2; printf("Error at line %d, column %d: identifier \"%s\" must not end with underscore. \n", line, column, yytext); }
+. //err = 3; printf("Error at line %d, column %d: unrecognized symbol \"%s\". \n", line, column, yytext); 
+
 %%
 /*
 int main( int argc, char **argv )
