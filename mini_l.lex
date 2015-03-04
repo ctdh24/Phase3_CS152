@@ -7,10 +7,12 @@
 #include "y.tab.h"
 #include <string.h>
 #include <sstream>
+#include <vector>
 using namespace std;
 
 int yyerror(char* s);
 int yylex(void);
+vector <string> ident_list;
 string output_vars;
 string output_code;
 %}
@@ -88,8 +90,8 @@ COMMENT ("##")(.)*
 /* Actions that occur when reading in token */
 %%
 {PROGRAM} column+=yyleng; produc +=1; {printf("%d: program -> PROGRAM\n", produc); return PROGRAM;}
-{BEGIN_PROGRAM} column+=yyleng; produc +=1; {freopen("code.txt", "a", stdout); printf(":= START\n"); fclose(stdout); return BEGIN_PROGRAM;}
-{END_PROGRAM} column+=yyleng; produc +=1; {freopen("code.txt", "a", stdout); printf(":= EndLabel\n"); fclose(stdout); return END_PROGRAM;}
+{BEGIN_PROGRAM} column+=yyleng; produc +=1; {freopen("code.txt", "a", stdout); printf("START\n"); fclose(stdout); return BEGIN_PROGRAM;}
+{END_PROGRAM} column+=yyleng; produc +=1; {freopen("code.txt", "a", stdout); printf("EndLabel\n"); fclose(stdout); return END_PROGRAM;}
 {INTEGER} column+=yyleng; produc +=1; {printf("%d: integer -> INTEGER \n", produc); return INTEGER;}
 {ARRAY} column+=yyleng; produc +=1; {printf("%d: array -> ARRAY\n", produc); return ARRAY;}
 {OF} column+=yyleng; produc +=1; {printf("%d: of -> OF\n", produc); return OF;}
@@ -134,7 +136,15 @@ COMMENT ("##")(.)*
 {R_PAREN} column+=yyleng; produc +=1; {printf("%d: r_paren -> R_PAREN\n", produc); return R_PAREN;}
 {ASSIGN} column+=yyleng; produc +=1; {printf("%d: assign -> ASSIGN\n", produc); return ASSIGN;}
 
-{IDENT} column+=yyleng; produc +=1; {printf("%d: ident -> IDENT (%s)\n", produc, yytext); return IDENT;}
+{IDENT} column+=yyleng; produc +=1; {
+    if(find(ident_list.begin(), ident_list.end(), yytext) == ident_list.end()){
+    ident_list.push_back(yytext);
+    freopen("vars.txt", "a", stdout); 
+    printf(". _%s \n", yytext); 
+    fclose(stdout); 
+    return IDENT;
+  }
+}
 {COMMENT} column+=yyleng;
 
 [ \t\r] column++; /*ignore whitespace. the space at the front is necessary for single space */
