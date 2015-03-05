@@ -30,11 +30,11 @@ int main(int argc, char **argv)
   string temp;
   while(code_file.good()){   
     getline(code_file, temp);
-    code_line += temp;
+    code_line += temp + "\n";
   }
 
   freopen("vars.txt", "a", stdout);
-  printf( "%s", code_line.c_str());
+  printf( "%s\n", code_line.c_str());
   fclose(stdout);fclose(stdin);
   //close file and return
   remove("code.txt");
