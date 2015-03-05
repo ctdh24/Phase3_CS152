@@ -7,6 +7,7 @@
 #include "y.tab.h"
 #include <string.h>
 #include <sstream>
+#include <stdio.h>
 #include <vector>
 using namespace std;
 
@@ -15,6 +16,7 @@ int yylex(void);
 vector <string> ident_list;
 string output_vars;
 string output_code;
+FILE * code_ptr;
 %}
 /* Keep track of current line and column for error messages */
 	int line = 1, column = 1, err = -1, produc = 0;
@@ -90,8 +92,8 @@ COMMENT ("##")(.)*
 /* Actions that occur when reading in token */
 %%
 {PROGRAM} column+=yyleng; produc +=1; {printf("%d: program -> PROGRAM\n", produc); return PROGRAM;}
-{BEGIN_PROGRAM} column+=yyleng; produc +=1; {freopen("code.txt", "a", stdout); printf("START\n"); fclose(stdout); return BEGIN_PROGRAM;}
-{END_PROGRAM} column+=yyleng; produc +=1; {freopen("code.txt", "a", stdout); printf("EndLabel\n"); fclose(stdout); return END_PROGRAM;}
+{BEGIN_PROGRAM} column+=yyleng; produc +=1; {freopen("code.txt", "a", stdout); printf(": START\n"); fclose(stdout); return BEGIN_PROGRAM;}
+{END_PROGRAM} column+=yyleng; produc +=1; {freopen("code.txt", "a", stdout); printf(": EndLabel\n"); fclose(stdout); return END_PROGRAM;}
 {INTEGER} column+=yyleng; produc +=1; {printf("%d: integer -> INTEGER \n", produc); return INTEGER;}
 {ARRAY} column+=yyleng; produc +=1; {printf("%d: array -> ARRAY\n", produc); return ARRAY;}
 {OF} column+=yyleng; produc +=1; {printf("%d: of -> OF\n", produc); return OF;}
@@ -107,8 +109,8 @@ COMMENT ("##")(.)*
 {BREAK} column+=yyleng; produc +=1; {printf("%d: break -> BREAK\n", produc); return BREAK;}
 {CONTINUE} column+=yyleng; produc +=1; {printf("%d: continue -> CONTINUE\n", produc); return CONTINUE;}
 {EXIT} column+=yyleng;produc +=1; {printf("%d: exit -> EXIT\n", produc); return EXIT;}
-{READ} column+=yyleng; produc +=1; {printf("%d: read -> READ\n", produc); return READ;}
-{WRITE} column+=yyleng; produc +=1; {printf("%d: write -> WRITE\n", produc); return WRITE;}
+{READ} column+=yyleng; produc +=1; {freopen("code.txt", "a", stdout); printf(".< "); fclose(stdout); return READ;}
+{WRITE} column+=yyleng; produc +=1; {freopen("code.txt", "a", stdout); printf(".> "); fclose(stdout); return WRITE;}
 {AND} column+=yyleng; produc +=1; {printf("%d: and -> AND\n", produc); return AND;}
 {OR} column+=yyleng; produc +=1; {printf("%d: or -> OR\n", produc); return OR;}
 {NOT} column+=yyleng; produc +=1; {printf("%d: not -> NOT\n", produc); return NOT;}
@@ -137,13 +139,19 @@ COMMENT ("##")(.)*
 {ASSIGN} column+=yyleng; produc +=1; {printf("%d: assign -> ASSIGN\n", produc); return ASSIGN;}
 
 {IDENT} column+=yyleng; produc +=1; {
-    if(find(ident_list.begin(), ident_list.end(), yytext) == ident_list.end()){
+  if(find(ident_list.begin(), ident_list.end(), yytext) == ident_list.end()){
     ident_list.push_back(yytext);
     freopen("vars.txt", "a", stdout); 
     printf(". _%s \n", yytext); 
-    fclose(stdout); 
-    return IDENT;
+    fclose(stdout);
   }
+  /*print to code.txt*/
+  else{
+    freopen("code.txt", "a", stdout); 
+    printf("_%s ", yytext); 
+    fclose(stdout);
+  }
+  return IDENT;
 }
 {COMMENT} column+=yyleng;
 
