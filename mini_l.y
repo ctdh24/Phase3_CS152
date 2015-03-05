@@ -7,6 +7,7 @@
 #include "heading.h"
 #include <string.h>
 #include <sstream>
+#include <stdio.h>
 #include <vector>
 int yyerror(char* s);
 int yylex(void);
@@ -14,9 +15,11 @@ extern int produc;
 extern int line;
 extern int column;
 extern int err;
+extern vector <string> ident_list;
 extern char *yytext;
 extern string output_vars;
 extern string output_code;
+extern FILE * code_ptr;
 
 %}
 
@@ -78,16 +81,20 @@ Statement: Var ":=" Exp  {produc += 1; printf("%d: statement -> var assign expre
   |IF Bool_Exp THEN Statement ";" Statement3 Statement4 ENDIF {produc += 1; printf("%d: statement -> if bool_exp then statement semicolon statement3 statement4 endif\n", produc);}
   |WHILE Bool_Exp BEGINLOOP Statement ";" Statement3 ENDLOOP {produc += 1; printf("%d: statement -> while bool_exp beginloop statement semicolon statement3 endloop\n", produc);}
   |DO BEGINLOOP Statement ";" Statement3 ENDLOOP WHILE Bool_Exp {produc += 1; printf("%d: statement -> do beginloop statement semicolon statement3 endloop while bool_exp\n", produc);}
-  |READ Var Statement2 {produc +=1; printf("%d: statement -> read var statement2\n", produc);}
-  |WRITE Var Statement2 {produc +=1; printf("%d: statement -> write var statement2\n", produc);}
+  |READ Var Statement2r {produc +=1; freopen("code.txt", "a", stdout); printf("\n"); fclose(stdout);}
+  |WRITE Var Statement2w {produc +=1; printf("%d: statement -> write var statement2\n", produc);}
   |BREAK
   |CONTINUE
   |EXIT
   | error Exp 
   ;
 
-Statement2: /*EMPTY*/ {produc +=1; printf("%d: statement2 -> \n", produc);}
-  | "," Var Statement2 {produc +=1; printf("%d: statement2 -> comma var statement2\n", produc);}
+Statement2r: /*EMPTY*/ {produc +=1;}
+  | "," Var Statement2r {produc +=1; code_ptr = fopen("code.txt", "a"); fseek(code_ptr, 0, SEEK_END)}
+  ;
+
+Statement2w: /*EMPTY*/ {produc +=1; printf("%d: statement2 -> \n", produc);}
+  | "," Var Statement2w {produc +=1; printf("%d: statement2 -> comma var statement2\n", produc);}
   ;
 
 Statement3: /*EMPTY*/ {produc +=1; printf("%d: statement3 -> \n", produc);}
