@@ -90,8 +90,21 @@ Statement: Var ":=" Exp  {produc += 1; printf("%d: statement -> var assign expre
   ;
 
 Statement2r: /*EMPTY*/ {produc +=1;}
-  | "," Var Statement2r {produc +=1; code_ptr = fopen("code.txt", "a"); fseek(code_ptr, 0, SEEK_END)}
-  ;
+  | "," Var Statement2r {
+    printf("HI");
+    produc +=1; 
+    code_ptr = fopen("code.txt", "a");
+    fseek(code_ptr, -1, SEEK_END);
+    fprintf(code_ptr, "\n");
+    int c = getc(code_ptr);
+    /*while(c != '_'){
+      ungetc(c, code_ptr);
+      fseek(code_ptr, -1, SEEK_CUR);
+      getc(code_ptr);
+    }*/
+    fprintf(code_ptr, ".< _");
+    fclose(code_ptr);
+  };
 
 Statement2w: /*EMPTY*/ {produc +=1; printf("%d: statement2 -> \n", produc);}
   | "," Var Statement2w {produc +=1; printf("%d: statement2 -> comma var statement2\n", produc);}
